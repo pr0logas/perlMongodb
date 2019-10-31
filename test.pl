@@ -18,6 +18,7 @@ my $db = $client->get_database( "$mongoDatabase" );
 my $collection = $db->get_collection( 'txidsProgress' );
 
 my $checkLastBlockResult;
+my $checkInitOnceResult = 0;
 
 # Mongo query;
 sub mongoQueryLastBlock {
@@ -38,6 +39,20 @@ while (my $object = $checkLastBlockResult->next) {
     }
 }
 
+sub checkInitOnceLatestBlock {
+mongoQueryLastBlock();
+while (my $object = $checkLastBlockResult->next) {
+    my $json = encode_json $object;
+    my $decoded = decode_json($json);
+    my $result = ($decoded->{'lastblock'});
+		if ( $result eq 0 ) {
+			return $checkInitOnceResult += 0;
+		} else {
+			return $checkInitOnceResult += 1;
+		}
+	}
+}
+
 sub checkLatestBlock {
 mongoQueryLastBlock();
 while (my $object = $checkLastBlockResult->next) {
@@ -49,4 +64,6 @@ while (my $object = $checkLastBlockResult->next) {
 }
 
 checkIfDBAlive();
+checkInitOnceLatestBlock();
 checkLatestBlock();
+print "\n$checkInitOnceResult";
