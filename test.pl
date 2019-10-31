@@ -17,40 +17,36 @@ my $client = MongoDB->connect("mongodb://$mongoHost:$mongoPort");
 my $db = $client->get_database( "$mongoDatabase" );
 my $collection = $db->get_collection( 'txidsProgress' );
 
-# Mongo query;
-my $check = $collection->find({})->fields({ lastblock => 1, _id => 0 });
+my $checkLastBlockResult;
 
-my $latestSyncBlockTxids = 0;
+# Mongo query;
+sub mongoQueryLastBlock {
+   $checkLastBlockResult = $collection->find({})->fields({ lastblock => 1, _id => 0 });
+   return $checkLastBlockResult;
+}
 
 sub checkIfDBAlive {
-    #debug $check
-    while (my $object = $check->next) {
-        my $json = encode_json $object;
-        my $decoded = decode_json($json);
-        my $result = ($decoded->{'lastblock'});
-	    if ( $result lt 0 ) {
-	        print "FATAL. Database not working?";
-   	        exit 42;
-	    }
-        return $result;
-    }
-    print "checkIfDBAlive finished";
+mongoQueryLastBlock;
+while (my $object = $checkLastBlockResult->next) {
+    my $json = encode_json $object;
+    my $decoded = decode_json($json);
+    my $result = ($decoded->{'lastblock'});
+	if ( $result lt 0 ) {
+	    print "FATAL. Database not working?";
+   	    exit 42;
+	}
+  }
 }
 
 sub checkLatestBlock {
-    #debug $check
-    while (my $object = $check->next) {
-        my $json = encode_json $object;
-        my $decoded = decode_json($json);
-        my $result = ($decoded->{'lastblock'});
-        return $result;
-    }
-    print "checkLatestBlock finished";
+mongoQueryLastBlock;
+while (my $object = $checkLastBlockResult->next) {
+    my $json = encode_json $object;
+    my $decoded = decode_json($json);
+    my $result = ($decoded->{'lastblock'});
+    return print $result;
+  }
 }
 
-#Pirmą kartą panaudojam $check rezultatą
-print checkIfDBAlive();
-#Antrą kartą panaudoti $check rezultatą negalime, nes jis pasibaigė, kai naudojom pirmoj funkcijoje
-print checkLatestBlock();
-
-#checkLatestBlock();
+checkIfDBAlive();
+checkLatestBlock();
