@@ -26,7 +26,7 @@ sub mongoQueryLastBlock {
 }
 
 sub checkIfDBAlive {
-mongoQueryLastBlock;
+mongoQueryLastBlock();
 while (my $object = $checkLastBlockResult->next) {
     my $json = encode_json $object;
     my $decoded = decode_json($json);
@@ -39,7 +39,7 @@ while (my $object = $checkLastBlockResult->next) {
 }
 
 sub checkLatestBlock {
-mongoQueryLastBlock;
+mongoQueryLastBlock();
 while (my $object = $checkLastBlockResult->next) {
     my $json = encode_json $object;
     my $decoded = decode_json($json);
