@@ -3,6 +3,7 @@
 use strict;
 use MongoDB;
 use JSON;
+use Try::Tiny;
 require 'mongoDBconnect.pl';
 
 
@@ -20,11 +21,26 @@ my $collection = $db->get_collection( 'txidsProgress' );
 my $checkLastBlockResult;
 my $checkInitOnceResult = 0;
 
+
+
 # Mongo query;
 sub mongoQueryLastBlock {
-   $checkLastBlockResult = $collection->find({})->fields({ lastblock => 1, _id => 0 });
-   return $checkLastBlockResult;
+	try {
+		$checkLastBlockResult = $collection->find({})->fields({ lastblock => 1, _id => 0 });
+	} catch {
+        warn "caught error: $_";
+	};
 }
+sub updateTxidsProgress {
+		print "\n$_[0]";
+        print "\n$_[1]";
+	try {
+    	$collection->update_many({ lastblock => "$_[1]"}, { '$set' => { lastblock => "$_[0]"}});
+	} catch {
+		warn "caught error: $_";
+	}
+}
+
 
 sub checkIfDBAlive {
 mongoQueryLastBlock();
@@ -59,11 +75,11 @@ while (my $object = $checkLastBlockResult->next) {
     my $json = encode_json $object;
     my $decoded = decode_json($json);
     my $result = ($decoded->{'lastblock'});
-    return print $result;
+    return $checkLastBlockResult = $result;
   }
 }
 
 checkIfDBAlive();
 checkInitOnceLatestBlock();
 checkLatestBlock();
-print "\n$checkInitOnceResult";
+updateTxidsProgress($checkLastBlockResult,($checkInitOnceResult + $checkLastBlockResult));
