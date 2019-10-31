@@ -23,27 +23,34 @@ my $check = $collection->find({})->fields({ lastblock => 1, _id => 0 });
 my $latestSyncBlockTxids = 0;
 
 sub checkIfDBAlive {
-while (my $object = $check->next) {
-    my $json = encode_json $object;
-    my $decoded = decode_json($json);
-    my $result = ($decoded->{'lastblock'});
-	if ( $result lt 0 ) {
-	    print "FATAL. Database not working?";
-   	    exit 42;
-	}
-  }
+    #debug $check
+    while (my $object = $check->next) {
+        my $json = encode_json $object;
+        my $decoded = decode_json($json);
+        my $result = ($decoded->{'lastblock'});
+	    if ( $result lt 0 ) {
+	        print "FATAL. Database not working?";
+   	        exit 42;
+	    }
+        return $result;
+    }
+    print "checkIfDBAlive finished";
 }
 
 sub checkLatestBlock {
-while (my $object = $check->next) {
-    my $json = encode_json $object;
-    my $decoded = decode_json($json);
-    my $result = ($decoded->{'lastblock'});
-    return print $result;
-  }
+    #debug $check
+    while (my $object = $check->next) {
+        my $json = encode_json $object;
+        my $decoded = decode_json($json);
+        my $result = ($decoded->{'lastblock'});
+        return $result;
+    }
+    print "checkLatestBlock finished";
 }
 
-checkIfDBAlive();
-checkLatestBlock();
+#Pirmą kartą panaudojam $check rezultatą
+print checkIfDBAlive();
+#Antrą kartą panaudoti $check rezultatą negalime, nes jis pasibaigė, kai naudojom pirmoj funkcijoje
+print checkLatestBlock();
 
 #checkLatestBlock();
