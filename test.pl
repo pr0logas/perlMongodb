@@ -32,8 +32,8 @@ while (my $object = $checkLastBlockResult->next) {
     my $decoded = decode_json($json);
     my $result = ($decoded->{'lastblock'});
         if ( $result lt 0 ) {
-	    print "FATAL. Database not working?";
-   	    exit 42;
+            print "FATAL. Database not working?";
+            exit 42;
 	}
   }
 }
