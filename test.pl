@@ -34,8 +34,8 @@ while (my $object = $checkLastBlockResult->next) {
         if ( $result lt 0 ) {
             print "FATAL. Database not working?";
             exit 42;
-	}
-  }
+        }
+    }
 }
 
 sub checkLatestBlock {
