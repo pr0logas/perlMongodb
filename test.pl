@@ -27,15 +27,22 @@ my $checkInitOnceResult = 0;
 sub mongoQueryLastBlock {
 	try {
 		$checkLastBlockResult = $collection->find({})->fields({ lastblock => 1, _id => 0 });
+		return $checkLastBlockResult;
 	} catch {
         warn "caught error: $_";
 	};
 }
+
 sub updateTxidsProgress {
-		print "\n$_[0]";
-        print "\n$_[1]";
+		my $value0 = $_[0];
+		my $value1 = $value0--;
 	try {
-    	$collection->update_many({ lastblock => "$_[1]"}, { '$set' => { lastblock => "$_[0]"}});
+		print "\n$value0";
+        print "\n$value1";
+        $collection->delete_many(
+            { lastblock => $value0});
+    	$collection->insert_one(
+			{ lastblock => $value1});
 	} catch {
 		warn "caught error: $_";
 	}
@@ -82,4 +89,5 @@ while (my $object = $checkLastBlockResult->next) {
 checkIfDBAlive();
 checkInitOnceLatestBlock();
 checkLatestBlock();
-updateTxidsProgress($checkLastBlockResult,($checkInitOnceResult + $checkLastBlockResult));
+$checkLastBlockResult++;
+updateTxidsProgress($checkLastBlockResult);
